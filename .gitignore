@@ -1,4 +1,4 @@
 
 .DS_Store
-OpenGLProject_Template/.idea/*
-OpenGLProject_Template/cmake-build-debug/*
+*/.idea/*
+*/cmake-build-debug/*
