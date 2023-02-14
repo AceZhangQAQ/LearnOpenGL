@@ -51,7 +51,7 @@ int main() {
     }
 
     //初始化Shader
-    Shader ourShader("/Users/acezhang/Documents/GitHub/LearnOpenGL/03_Texture/shader/shader.vs","/Users/acezhang/Documents/GitHub/LearnOpenGL/03_Texture/shader/shader.fs");
+    Shader ourShader("/Users/acezhang/Documents/GitHub/LearnOpenGL/04_TransformByGLM/shader/shader.vs","/Users/acezhang/Documents/GitHub/LearnOpenGL/04_TransformByGLM/shader/shader.fs");
 //    Shader ourShader("D:/Studys_Files/GithubFiles/LearnOpenGL/03_Texture/shader/shader.vs","D:/Studys_Files/GithubFiles/LearnOpenGL/03_Texture/shader/shader.fs");
     //设置顶点属性数据
     float vertices[] = {
