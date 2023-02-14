@@ -1,0 +1,3 @@
+D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/cmake-build-debug/CMakeFiles/Transform.dir
+D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/cmake-build-debug/CMakeFiles/rebuild_cache.dir
