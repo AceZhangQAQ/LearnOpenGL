@@ -5,6 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <cmath>
+
 #include "Shader.h"
 #include "includes/stb_image/stb_image.h"
 
@@ -51,8 +53,8 @@ int main() {
     }
 
     //初始化Shader
-    Shader ourShader("/Users/acezhang/Documents/GitHub/LearnOpenGL/04_TransformByGLM/shader/shader.vs","/Users/acezhang/Documents/GitHub/LearnOpenGL/04_TransformByGLM/shader/shader.fs");
-//    Shader ourShader("D:/Studys_Files/GithubFiles/LearnOpenGL/03_Texture/shader/shader.vs","D:/Studys_Files/GithubFiles/LearnOpenGL/03_Texture/shader/shader.fs");
+//    Shader ourShader("/Users/acezhang/Documents/GitHub/LearnOpenGL/04_TransformByGLM/shader/shader.vs","/Users/acezhang/Documents/GitHub/LearnOpenGL/04_TransformByGLM/shader/shader.fs");
+    Shader ourShader("D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/shader/shader.vs","D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/shader/shader.fs");
     //设置顶点属性数据
     float vertices[] = {
             // positions                      // colors                       // texture coords
@@ -101,8 +103,8 @@ int main() {
     //加载并生成纹理
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);//翻转y轴加载纹理
-    unsigned char *data = stbi_load("/Users/acezhang/Documents/GitHub/LearnOpenGL/04_TransformByGLM/src/image/container.jpg", &width, &height, &nrChannels, 0);
-//    unsigned char *data = stbi_load("D:/Studys_Files/GithubFiles/LearnOpenGL/03_Texture/image/container.jpg", &width, &height, &nrChannels, 0);
+//    unsigned char *data = stbi_load("/Users/acezhang/Documents/GitHub/LearnOpenGL/04_TransformByGLM/src/image/container.jpg", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load("D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/src/image/container.jpg", &width, &height, &nrChannels, 0);
     if(data){
         glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,data);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -117,8 +119,8 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 
-    data = stbi_load("/Users/acezhang/Documents/GitHub/LearnOpenGL/04_TransformByGLM/src/image/awesomeface.png", &width, &height, &nrChannels, 0);
-//    data = stbi_load("D:/Studys_Files/GithubFiles/LearnOpenGL/03_Texture/image/awesomeface.png", &width, &height, &nrChannels, 0);
+//    data = stbi_load("/Users/acezhang/Documents/GitHub/LearnOpenGL/04_TransformByGLM/src/image/awesomeface.png", &width, &height, &nrChannels, 0);
+    data = stbi_load("D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/src/image/awesomeface.png", &width, &height, &nrChannels, 0);
     if(data){
         glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,data);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -148,7 +150,10 @@ int main() {
 
         //旋转变换
         glm::mat4 transform = glm::mat4(1.0f);
-        transform = glm::translate(transform,glm::vec3(0.5f,-0.5f,0.0f));
+//        transform = glm::translate(transform,glm::vec3(0.5f,-0.5f,0.0f));
+        float ratios = (sin((float)glfwGetTime()) + 1) / 2;
+        transform = glm::translate(transform,glm::vec3(-0.5,0.5f,0.0f));
+        transform = glm::scale(transform,glm::vec3(ratios,ratios,1.0f));
         transform = glm::rotate(transform,(float)glfwGetTime(),glm::vec3(0.0f,0.0f,1.0f));
 
         ourShader.setFloat("alpha",mixValue);
