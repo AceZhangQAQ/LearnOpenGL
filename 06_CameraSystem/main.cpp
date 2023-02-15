@@ -12,7 +12,13 @@
 
 #include <iostream>
 
+//窗口改变回调函数
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+//鼠标位置改变回调函数
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+//鼠标滚轮滑动改变回调函数
+void scroll_callback(GLFWwindow* window, double xoffset,double yoffset);
+//处理输入函数
 void processInput(GLFWwindow *window);
 
 // settings
@@ -26,12 +32,25 @@ glm::vec3 cameraPos = glm::vec3(0.0f,0.0f,3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f,0.0f,-1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f,1.0f,0.0f);
 
+//摄像机俯仰角、偏航角
+float pitch = 0.0f, yaw = -90.0f;
+
+//摄像机fov
+float fov = 45.0f;
+
+
 //帧时间
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+//上一帧鼠标位置
+float lastX = 400.0f,lastY = 300.0f;
+
+bool firstMovingIn = true;
+
+
 int main() {
-    // glfw: initialize and configure
+    // GLFW初始化
     // ------------------------------
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -41,7 +60,7 @@ int main() {
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-    // glfw window creation
+    // 创建窗口
     // --------------------
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
@@ -51,6 +70,7 @@ int main() {
         return -1;
     }
     glfwMakeContextCurrent(window);
+    //注册窗口改变回掉函数
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // glad: load all OpenGL function pointers
@@ -63,6 +83,12 @@ int main() {
 
     //开启深度缓冲测试
     glEnable(GL_DEPTH_TEST);
+    //设置鼠标光标隐藏
+    //glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+    //注册鼠标移动回调函数
+    glfwSetCursorPosCallback(window,mouse_callback);
+    //注册鼠标滚轮回调函数
+    glfwSetScrollCallback(window, scroll_callback);
 
     //初始化Shader
     Shader ourShader("/Users/acezhang/Documents/GitHub/LearnOpenGL/05_CoordSystem/shader/shader.vs","/Users/acezhang/Documents/GitHub/LearnOpenGL/05_CoordSystem/shader/shader.fs");
@@ -220,7 +246,7 @@ int main() {
         //摆放摄像机
         view = glm::lookAt(cameraPos,cameraPos + cameraFront,cameraUp);
         //投影
-        projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
         //在顶点着色器中设置相应变换矩阵
         //unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
@@ -245,24 +271,25 @@ int main() {
 
             glDrawArrays(GL_TRIANGLES,0,36);
         }
-        //glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
 
         //交换缓存
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    //释放资源
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-//    glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;
 }
 
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
+/**
+ * 处理输入函数
+ * @param window
+ */
 void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -296,12 +323,70 @@ void processInput(GLFWwindow *window)
     }
 }
 
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
+/**
+ * 窗口改变回调函数
+ * @param window
+ * @param width
+ * @param height
+ */
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
+}
+
+/**
+ * 鼠标位置改变回调函数
+ * @param window
+ * @param xpos
+ * @param ypos
+ */
+void mouse_callback(GLFWwindow* window, double xpos, double ypos){
+    if(firstMovingIn){
+        lastX = xpos;
+        lastY = ypos;
+        firstMovingIn = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.05f;//鼠标灵敏度
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if(pitch > 89.0f)
+        pitch = 89.0f;
+    if(pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+    cameraFront = glm::normalize(front);
+}
+
+/**
+ * 鼠标滚轮滑动回调函数
+ * @param window
+ * @param xoffset
+ * @param yoffset
+ */
+void scroll_callback(GLFWwindow* window,double xoffset,double yoffset){
+    if(fov >= 1.0f && fov <= 60.0f){
+        fov -= yoffset;
+    }
+    if(fov <= 1.0f)
+        fov = 1.0f;
+    if(fov >= 60.0f)
+        fov = 60.0f;
 }
 
