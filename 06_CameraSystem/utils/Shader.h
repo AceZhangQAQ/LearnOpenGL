@@ -5,7 +5,7 @@
 #ifndef GLSL_PRACTICE_SHADER_H
 #define GLSL_PRACTICE_SHADER_H
 
-#include <glad/glad.h>
+#include "glad/glad.h"
 
 #include <string>
 #include <fstream>

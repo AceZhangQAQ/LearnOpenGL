@@ -16,7 +16,8 @@ link_directories(/opt/homebrew/Cellar/glfw/3.3.8/lib)
 add_executable(CameraSystem
         includes/glad/src/glad.c
         includes/stb_image/stb_image.cpp
-        shader.h
+        utils/Shader.h
+        utils/Camera.h
         main.cpp)
 
 target_link_libraries(
