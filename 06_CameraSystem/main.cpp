@@ -20,6 +20,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset,double yoffset);
 //处理输入函数
 void processInput(GLFWwindow *window);
+//创建观察矩阵
+glm::mat4 lookAt(glm::vec3 cameraPos, glm::vec3 cameraTarget, glm::vec3 worldUp);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -244,7 +246,8 @@ int main() {
         //在世界坐标中移动物体
         //model = glm::rotate(model,(float)glfwGetTime() * glm::radians(-50.0f),glm::vec3(1.0f,0.0f,0.0f));
         //摆放摄像机
-        view = glm::lookAt(cameraPos,cameraPos + cameraFront,cameraUp);
+//        view = glm::lookAt(cameraPos,cameraPos + cameraFront,cameraUp);
+        view = lookAt(cameraPos,cameraPos + cameraFront,cameraUp);
         //投影
         projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
@@ -321,6 +324,7 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
         cameraPos += glm::normalize(glm::cross(cameraFront,cameraUp)) * cameraSpeed;
     }
+    cameraPos.y = 0.0f;
 }
 
 /**
@@ -354,7 +358,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos){
     lastX = xpos;
     lastY = ypos;
 
-    float sensitivity = 0.05f;//鼠标灵敏度
+    float sensitivity = 0.5f;//鼠标灵敏度
     xoffset *= sensitivity;
     yoffset *= sensitivity;
 
@@ -388,5 +392,33 @@ void scroll_callback(GLFWwindow* window,double xoffset,double yoffset){
         fov = 1.0f;
     if(fov >= 60.0f)
         fov = 60.0f;
+}
+
+//创建观察矩阵
+glm::mat4 lookAt(glm::vec3 cameraPos, glm::vec3 cameraTarget, glm::vec3 worldUp){
+    //建立摄像机空间坐标系
+    glm::vec3 zaxis = glm::normalize(cameraPos - cameraTarget);
+    glm::vec3 xaxis = glm::normalize(glm::cross(glm::normalize(worldUp),zaxis));
+    glm::vec3 yaxis = glm::normalize(glm::cross(zaxis,xaxis));
+
+    //创建lookAt矩阵
+    //创建位移矩阵
+    glm::mat4 translation = glm::mat4(1.0f);
+    translation[3][0] = -cameraPos.x;
+    translation[3][1] = -cameraPos.y;
+    translation[3][2] = -cameraPos.z;
+    //创建旋转矩阵
+    glm::mat4 rotate = glm::mat4(1.0f);
+    rotate[0][0] = xaxis.x;
+    rotate[1][0] = xaxis.y;
+    rotate[2][0] = xaxis.z;
+    rotate[0][1] = yaxis.x;
+    rotate[1][1] = yaxis.y;
+    rotate[2][1] = yaxis.z;
+    rotate[0][2] = zaxis.x;
+    rotate[1][2] = zaxis.y;
+    rotate[2][2] = zaxis.z;
+
+    return rotate * translation;
 }
 
