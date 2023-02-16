@@ -79,7 +79,7 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
 
     //初始化Shader
-    Shader ourShader("/Users/acezhang/Documents/GitHub/LearnOpenGL/05_CoordSystem/shader/shader.vs","/Users/acezhang/Documents/GitHub/LearnOpenGL/05_CoordSystem/shader/shader.fs");
+    Shader ourShader("/Users/acezhang/Documents/GitHub/LearnOpenGL/07_CreateLightScene/shader/shader.vs","/Users/acezhang/Documents/GitHub/LearnOpenGL/07_CreateLightScene/shader/shader.fs");
     //Shader ourShader("D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/shader/shader.vs","D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/shader/shader.fs");
 
     //设置顶点属性数据
@@ -176,7 +176,7 @@ int main() {
     //加载并生成纹理
     int width, height, nrChannels;
     stbi_set_flip_vertically_on_load(true);//翻转y轴加载纹理
-    unsigned char *data = stbi_load("/Users/acezhang/Documents/GitHub/LearnOpenGL/05_CoordSystem/src/image/container.jpg", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load("/Users/acezhang/Documents/GitHub/LearnOpenGL/07_CreateLightScene/source/image/container.jpg", &width, &height, &nrChannels, 0);
     //unsigned char *data = stbi_load("D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/src/image/container.jpg", &width, &height, &nrChannels, 0);
     if(data){
         glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,data);
@@ -192,7 +192,7 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 
-    data = stbi_load("/Users/acezhang/Documents/GitHub/LearnOpenGL/05_CoordSystem/src/image/awesomeface.png", &width, &height, &nrChannels, 0);
+    data = stbi_load("/Users/acezhang/Documents/GitHub/LearnOpenGL/07_CreateLightScene/source/image/awesomeface.png", &width, &height, &nrChannels, 0);
     //data = stbi_load("D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/src/image/awesomeface.png", &width, &height, &nrChannels, 0);
     if(data){
         glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,data);
