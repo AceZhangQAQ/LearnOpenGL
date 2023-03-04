@@ -24,7 +24,7 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 //摄像机位置、方向
-Camera camera(glm::vec3(0.0f,0.0f,3.0f));
+Camera camera(glm::vec3(0.0f,0.0f,4.0f));
 
 //帧时间
 float deltaTime = 0.0f;
@@ -36,7 +36,7 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMovingIn = true;
 
 //灯位置
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightPos(1.0f, 0.8f, 0.5f);
 
 int main() {
     // GLFW初始化
