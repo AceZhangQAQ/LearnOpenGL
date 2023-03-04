@@ -23,8 +23,6 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-float mixValue = 0.2f;
-
 //摄像机位置、方向
 Camera camera(glm::vec3(0.0f,0.0f,3.0f));
 
@@ -36,6 +34,9 @@ float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 //是否是第一次移入窗口
 bool firstMovingIn = true;
+
+//灯位置
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 int main() {
     // GLFW初始化
@@ -60,6 +61,12 @@ int main() {
     glfwMakeContextCurrent(window);
     //注册窗口改变回掉函数
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    //设置鼠标光标隐藏
+    //glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+    //注册鼠标移动回调函数
+    glfwSetCursorPosCallback(window,mouse_callback);
+    //注册鼠标滚轮回调函数
+    glfwSetScrollCallback(window, scroll_callback);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -71,141 +78,75 @@ int main() {
 
     //开启深度缓冲测试
     glEnable(GL_DEPTH_TEST);
-    //设置鼠标光标隐藏
-    //glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
-    //注册鼠标移动回调函数
-    glfwSetCursorPosCallback(window,mouse_callback);
-    //注册鼠标滚轮回调函数
-    glfwSetScrollCallback(window, scroll_callback);
 
     //初始化Shader
-    Shader ourShader("/Users/acezhang/Documents/GitHub/LearnOpenGL/07_CreateLightScene/shader/shader.vs","/Users/acezhang/Documents/GitHub/LearnOpenGL/07_CreateLightScene/shader/shader.fs");
-    //Shader ourShader("D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/shader/shader.vs","D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/shader/shader.fs");
+    Shader lightShader("/Users/acezhang/Documents/GitHub/LearnOpenGL/07_CreateLightScene/shader/lightShader.vs","/Users/acezhang/Documents/GitHub/LearnOpenGL/07_CreateLightScene/shader/lightShader.fs");
+    Shader boxShader("/Users/acezhang/Documents/GitHub/LearnOpenGL/07_CreateLightScene/shader/boxShader.vs","/Users/acezhang/Documents/GitHub/LearnOpenGL/07_CreateLightScene/shader/boxShader.fs");
 
-    //设置顶点属性数据
+    //设置顶点属性数据,共12个三角形，36个点。
     float vertices[] = {
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,
+            0.5f, -0.5f, -0.5f,
+            0.5f,  0.5f, -0.5f,
+            0.5f,  0.5f, -0.5f,
+            -0.5f,  0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,
 
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,
+            0.5f, -0.5f,  0.5f,
+            0.5f,  0.5f,  0.5f,
+            0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f,  0.5f,
+            -0.5f, -0.5f,  0.5f,
 
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,
+            -0.5f, -0.5f, -0.5f,
+            -0.5f, -0.5f,  0.5f,
+            -0.5f,  0.5f,  0.5f,
 
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,
+            0.5f,  0.5f, -0.5f,
+            0.5f, -0.5f, -0.5f,
+            0.5f, -0.5f, -0.5f,
+            0.5f, -0.5f,  0.5f,
+            0.5f,  0.5f,  0.5f,
 
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,
+            0.5f, -0.5f, -0.5f,
+            0.5f, -0.5f,  0.5f,
+            0.5f, -0.5f,  0.5f,
+            -0.5f, -0.5f,  0.5f,
+            -0.5f, -0.5f, -0.5f,
 
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+            -0.5f,  0.5f, -0.5f,
+            0.5f,  0.5f, -0.5f,
+            0.5f,  0.5f,  0.5f,
+            0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f, -0.5f,
     };
 
-    //10个cube在世界坐标中的位置
-    glm::vec3 cubePositions[] = {
-            glm::vec3( 0.0f,  0.0f,  0.0f),
-            glm::vec3( 2.0f,  5.0f, -15.0f),
-            glm::vec3(-1.5f, -2.2f, -2.5f),
-            glm::vec3(-3.8f, -2.0f, -12.3f),
-            glm::vec3( 2.4f, -0.4f, -3.5f),
-            glm::vec3(-1.7f,  3.0f, -7.5f),
-            glm::vec3( 1.3f, -2.0f, -2.5f),
-            glm::vec3( 1.5f,  2.0f, -2.5f),
-            glm::vec3( 1.5f,  0.2f, -1.5f),
-            glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
+    //设置VAO、VBO
+    unsigned int VBO, lightVAO, boxVAO;
 
-    //设置VAO、VBO、EBO
-    //unsigned int VAO,VBO,EBO;
-    unsigned int VAO,VBO;
-
-    glGenVertexArrays(1,&VAO);
+    //加载顶点数据
     glGenBuffers(1,&VBO);
-    //glGenBuffers(1,&EBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof (vertices), vertices, GL_STATIC_DRAW);
 
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER,VBO);
-    glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW);
-
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(indices),indices,GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,5 * sizeof(float), (void*)0);
+    //解释光源顶点数据
+    glGenVertexArrays(1, &lightVAO);
+    glBindVertexArray(lightVAO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
 
-    //创建纹理对象
-    unsigned int texture1,texture2;
-    glGenTextures(1,&texture1);
-    glBindTexture(GL_TEXTURE_2D,texture1);
-
-    //为纹理对象设置环绕方式、过滤方式
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-
-    //加载并生成纹理
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true);//翻转y轴加载纹理
-    unsigned char *data = stbi_load("/Users/acezhang/Documents/GitHub/LearnOpenGL/07_CreateLightScene/source/image/container.jpg", &width, &height, &nrChannels, 0);
-    //unsigned char *data = stbi_load("D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/src/image/container.jpg", &width, &height, &nrChannels, 0);
-    if(data){
-        glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,GL_UNSIGNED_BYTE,data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }else{
-        std::cout << "ERROR::TEXTURE::LOAD::FAILED TO LOAD TEXTURE IMAGE" << std::endl;
-    }
-    stbi_image_free(data);
-    glGenTextures(1,&texture2);
-    glBindTexture(GL_TEXTURE_2D,texture2);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-
-    data = stbi_load("/Users/acezhang/Documents/GitHub/LearnOpenGL/07_CreateLightScene/source/image/awesomeface.png", &width, &height, &nrChannels, 0);
-    //data = stbi_load("D:/Studys_Files/GithubFiles/LearnOpenGL/04_TransformByGLM/src/image/awesomeface.png", &width, &height, &nrChannels, 0);
-    if(data){
-        glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }else{
-        std::cout << "ERROR::TEXTURE::LOAD::FAILED TO LOAD TEXTURE IMAGE" << std::endl;
-    }
-    stbi_image_free(data);
-
-    ourShader.use();
-    //两种方式来设置纹理对应的纹理单元
-    glUniform1i(glGetUniformLocation(ourShader.ID, "texture1"), 0);
-    ourShader.setInt("texture2", 1);
+    //解释盒子顶点数据
+    glGenVertexArrays(1, &boxVAO);
+    glBindVertexArray(boxVAO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     //渲染循环
     while (!glfwWindowShouldClose(window)){
@@ -219,38 +160,32 @@ int main() {
         glClearColor(0.2f,0.3f,0.3f,1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //绑定纹理
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D,texture1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D,texture2);
-
-        ourShader.use();
-
-        //设置笑脸贴图透明度
-        ourShader.setFloat("alpha",mixValue);
-
-        //设置投影矩阵
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom),(float)SCR_WIDTH / (float)SCR_HEIGHT,0.1f,100.0f);
-        ourShader.setMat4("projection",projection);
-        //设置观测矩阵
+        //更新model,view和projection矩阵
+        glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = camera.GetViewMatrix();
-        ourShader.setMat4("view",view);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
-        glBindVertexArray(VAO);
-        //每帧画10个箱子
-        for(unsigned int i = 0; i < 10; i++){
-            glm::mat4 model = glm::mat4 (1.0f);
-            //设置箱子在世界坐标中的位置
-            model = glm::translate(model,cubePositions[i]);
+        //渲染光源
+        lightShader.use();
+        lightShader.setMat4("projection",projection);
+        lightShader.setMat4("view",view);
+        model = glm::translate(model, lightPos);//移动光源
+        model = glm::scale(model, glm::vec3(0.2f));//缩放光源
+        lightShader.setMat4("model",model);
+        glBindVertexArray(lightVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
-            float angle = glfwGetTime() * 25.0f + 25.0f * i;
-            //设置箱子的旋转
-            model = glm::rotate(model,glm::radians(angle),glm::vec3(1.0f,0.3f,0.5f));
-            ourShader.setMat4("model",model);
-
-            glDrawArrays(GL_TRIANGLES,0,36);
-        }
+        //渲染物体
+        boxShader.use();
+        //设置光源颜色和物体颜色
+        boxShader.setVec3("objectColor",glm::vec3(1.0f, 0.5f, 0.31f));
+        boxShader.setVec3("lightColor",glm::vec3(1.0f, 1.0f, 1.0f));
+        boxShader.setMat4("projection",projection);
+        boxShader.setMat4("view",view);
+        model = glm::mat4(1.0f);
+        boxShader.setMat4("model",model);
+        glBindVertexArray(boxVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         //交换缓存
         glfwSwapBuffers(window);
@@ -258,7 +193,8 @@ int main() {
     }
 
     //释放资源
-    glDeleteVertexArrays(1, &VAO);
+    glDeleteVertexArrays(1, &lightVAO);
+    glDeleteVertexArrays(1, &boxVAO);
     glDeleteBuffers(1, &VBO);
 
     glfwTerminate();
@@ -274,16 +210,6 @@ void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-        mixValue += 0.01f;
-        if(mixValue >= 1.0f)
-            mixValue = 1.0f;
-    }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-        mixValue -= 0.01f;
-        if(mixValue <= 0.0f)
-            mixValue = 0.0f;
-    }
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
