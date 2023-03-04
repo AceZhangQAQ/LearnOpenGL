@@ -36,7 +36,7 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMovingIn = true;
 
 //光源立方体的位置
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightPos(1.2f, 1.2f, -2.0f);
 //光源颜色
 glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 //物体颜色
@@ -173,15 +173,21 @@ int main() {
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
-        //渲染光源
+        float angle = glfwGetTime() * 25.0f;
+
+        //渲染光源cube
         lightShader.use();
         lightShader.setMat4("projection",projection);
         lightShader.setMat4("view",view);
-        model = glm::translate(model, lightPos);//移动光源
+        model = glm::rotate(model, glm::radians(angle),glm::vec3(0.0f,1.0f,0.0f));//旋转光源cube
+        model = glm::translate(model, lightPos);//移动光源cube
         model = glm::scale(model, glm::vec3(0.5f));//缩放光源
+        model = glm::rotate(model, glm::radians(angle * 0.1f),glm::vec3(0.5f,0.3f,0.7f));//旋转光源cube
         lightShader.setMat4("model",model);
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        //移动真正的光源
+        lightPos = model * glm::vec4(0.0f,0.0f,0.0f,1.0f);
 
         //渲染物体
         boxShader.use();
@@ -189,9 +195,11 @@ int main() {
         boxShader.setVec3("objectColor",objectColor);
         boxShader.setVec3("lightColor",lightColor);
         boxShader.setVec3("lightPos", lightPos);
+        boxShader.setVec3("viewPos", camera.Position);
         boxShader.setMat4("projection",projection);
         boxShader.setMat4("view",view);
         model = glm::mat4(1.0f);
+        model = glm::rotate(model, glm::radians(angle),glm::vec3(1.0f,0.3f,0.5f));
         boxShader.setMat4("model",model);
         glBindVertexArray(boxVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
