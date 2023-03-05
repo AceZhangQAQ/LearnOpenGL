@@ -173,21 +173,24 @@ int main() {
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
-        float angle = glfwGetTime() * 25.0f;
+        float angle = deltaTime * 60;
+
+        //移动真正的点光源
+        glm::mat4 lightRotate = glm::mat3(1.0f);
+        lightRotate = glm::rotate(lightRotate,glm::radians(angle ),glm::vec3(0.0f,1.0f,0.0f));
+        lightPos = glm::mat3(lightRotate) * lightPos;
 
         //渲染光源cube
         lightShader.use();
         lightShader.setMat4("projection",projection);
         lightShader.setMat4("view",view);
-        model = glm::rotate(model, glm::radians(angle),glm::vec3(0.0f,1.0f,0.0f));//旋转光源cube
-        model = glm::translate(model, lightPos);//移动光源cube
+        model = glm::translate(model, lightPos);//移动光源cube到lightPos
         model = glm::scale(model, glm::vec3(0.5f));//缩放光源
-        model = glm::rotate(model, glm::radians(angle * 0.1f),glm::vec3(0.5f,0.3f,0.7f));//旋转光源cube
+        model = glm::rotate(model, glm::radians(currentFrame * 25),glm::vec3(0.5f,0.3f,0.7f));//旋转光源cube
         lightShader.setMat4("model",model);
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        //移动真正的光源
-        lightPos = model * glm::vec4(0.0f,0.0f,0.0f,1.0f);
+
 
         //渲染物体
         boxShader.use();
@@ -199,7 +202,7 @@ int main() {
         boxShader.setMat4("projection",projection);
         boxShader.setMat4("view",view);
         model = glm::mat4(1.0f);
-        model = glm::rotate(model, glm::radians(angle),glm::vec3(1.0f,0.3f,0.5f));
+        model = glm::rotate(model, glm::radians(currentFrame * 25),glm::vec3(1.0f,0.3f,0.5f));
         boxShader.setMat4("model",model);
         glBindVertexArray(boxVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
